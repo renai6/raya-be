@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from 'prisma/prisma.service';
 
@@ -18,7 +17,6 @@ export class TransactionsService {
   }
   findAllByDay() {
     const date = new Date();
-
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
     const end = new Date(date);

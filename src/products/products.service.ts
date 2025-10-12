@@ -29,13 +29,37 @@ export class ProductsService {
     return product;
   }
 
-  findAll() {
-    return this.prisma.product.findMany();
+  async findAll(page: number, pageSize: number = 10) {
+    let where = {};
+    if (page > 0) {
+      where = { skip: (page - 1) * pageSize, take: pageSize };
+    }
+    const products = await this.prisma.product.findMany(where);
+
+    const count = await this.prisma.product.count();
+
+    return { products, count };
   }
 
   async findLowStocks() {
     const products = await this.prisma.product.findMany({
       where: { stock: { lt: 10 } },
+    });
+
+    return products;
+  }
+
+  async findProductSales() {
+    const products = await this.prisma.product.findMany({
+      include: {
+        sales: true,
+      },
+      orderBy: {
+        sales: {
+          _count: 'desc',
+        },
+      },
+      take: 10,
     });
 
     return products;
