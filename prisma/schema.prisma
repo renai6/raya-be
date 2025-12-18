@@ -25,10 +25,26 @@ model User {
   updatedAt     DateTime @updatedAt
 }
 
+model Employee {
+  id             String        @id @default(cuid())
+  employeeNumber String        @unique
+  name           String
+  contactNumber  String?
+  email          String?       @unique
+  transactions   Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
 enum Role {
   ADMIN
   MANAGER
   CASHIER
+}
+
+enum TransactionPaymentType {
+  CASH
+  CREDIT
 }
 
 enum InventoryTransactionType {
@@ -56,11 +72,15 @@ enum SaleType {
 }
 
 model Transaction {
-  id           String   @id @default(cuid())
-  sales        Sale[]
-  total        Float
-  cashReceived Float    @default(0)
-  createdAt    DateTime @default(now())
+  id             String                 @id @default(cuid())
+  sales          Sale[]
+  total          Float
+  cashReceived   Float                  @default(0)
+  employeeNumber String?
+  paymentType    TransactionPaymentType @default(CASH)
+  createdAt      DateTime               @default(now())
+  employee       Employee?              @relation(fields: [employeeId], references: [id])
+  employeeId     String?
 }
 
 model InventoryTransaction {

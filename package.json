@@ -35,6 +35,8 @@
     "escpos": "3.0.0-alpha.6",
     "escpos-network": "3.0.0-alpha.5",
     "escpos-usb": "3.0.0-alpha.4",
+    "jspdf": "^3.0.4",
+    "jspdf-autotable": "^5.0.2",
     "node-thermal-printer": "^4.5.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

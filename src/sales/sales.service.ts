@@ -10,15 +10,38 @@ export class SalesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createTransactionDto: CreateTransactionDto) {
-    const transaction = await this.prisma.transaction.create({
-      data: {
-        cashReceived: createTransactionDto.cashReceived,
-        total: createTransactionDto.sales.reduce(
-          (acc, item) => acc + item.selectedPrice * item.quantity,
-          0,
-        ),
-      },
-    });
+    let transaction;
+
+    if (createTransactionDto.employeeBarcode) {
+      const employee = await this.prisma.employee.findUnique({
+        where: { employeeNumber: createTransactionDto.employeeBarcode },
+      });
+
+      transaction = await this.prisma.transaction.create({
+        data: {
+          cashReceived: createTransactionDto.cashReceived,
+          paymentType: createTransactionDto.paymentType,
+          employeeNumber: createTransactionDto.employeeBarcode || null,
+          employeeId: employee?.id || null,
+          total: createTransactionDto.sales.reduce(
+            (acc, item) => acc + item.selectedPrice * item.quantity,
+            0,
+          ),
+        },
+      });
+    } else {
+      transaction = await this.prisma.transaction.create({
+        data: {
+          cashReceived: createTransactionDto.cashReceived,
+          paymentType: createTransactionDto.paymentType,
+          employeeNumber: null,
+          total: createTransactionDto.sales.reduce(
+            (acc, item) => acc + item.selectedPrice * item.quantity,
+            0,
+          ),
+        },
+      });
+    }
 
     const newSales = await this.prisma.sale.createMany({
       data: createTransactionDto.sales.map((item) => ({

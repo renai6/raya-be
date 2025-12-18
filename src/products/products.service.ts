@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'prisma/prisma.service';
+import { jsPDF } from 'jspdf';
+import { autoTable } from 'jspdf-autotable';
 
 @Injectable()
 export class ProductsService {
@@ -98,5 +100,57 @@ export class ProductsService {
 
   remove(id: string) {
     return this.prisma.product.delete({ where: { id } });
+  }
+
+  async generateReport(startDate: Date, endDate: Date): Promise<Buffer> {
+    const products = await this.prisma.product.findMany({
+      select: {
+        name: true,
+        stock: true,
+        updatedAt: true,
+      },
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const doc = new jsPDF();
+    doc.setFont('helvetica');
+    doc.setFontSize(10);
+    doc.text(
+      'Steel Colors and Metal Products - Canteent Invetory Report',
+      15,
+      15,
+    );
+    doc.text(
+      `From: ${startDate.toDateString()} To: ${endDate.toDateString()}`,
+      15,
+      20,
+    );
+
+    const data = products.map((t) => [
+      t.name || '',
+      t.stock.toString(),
+      t.updatedAt.toDateString(),
+    ]);
+
+    autoTable(doc, {
+      headStyles: { fillColor: [22, 160, 133] },
+      head: [['Name', 'Stock', 'Date']],
+      body: data,
+      startY: 25,
+      columnStyles: {
+        0: { cellWidth: 100 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 40 },
+      },
+    });
+
+    const buffer = doc.output('arraybuffer');
+    return Buffer.from(buffer);
   }
 }
