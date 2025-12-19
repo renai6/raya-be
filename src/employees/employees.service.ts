@@ -141,6 +141,8 @@ export class EmployeesService {
   }
 
   async generateReport(startDate: Date, endDate: Date): Promise<Buffer> {
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
     const transactions = await this.prisma.transaction.findMany({
       where: {
         createdAt: {

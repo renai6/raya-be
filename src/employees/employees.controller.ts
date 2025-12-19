@@ -10,12 +10,17 @@ import {
   Query,
   Logger,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { ActiveSessionGuard } from 'src/auth/active-session-guard';
 
+@UseGuards(JwtAuthGuard, RolesGuard, ActiveSessionGuard)
 @Controller('employees')
 export class EmployeesController {
   private readonly logger = new Logger('EmployeesController');

@@ -15,14 +15,17 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  contactNumber String
-  email         String   @unique
-  password      String
-  role          Role     @default(CASHIER)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                String    @id @default(cuid())
+  active_session_id String?   @unique
+  name              String
+  contactNumber     String?
+  email             String    @unique
+  password          String
+  activeSessionId   String?
+  lastLoginAt       DateTime?
+  role              Role      @default(CASHIER)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model Employee {

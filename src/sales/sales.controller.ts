@@ -9,14 +9,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
-import { CreateSaleDto, CreateTransactionDto } from './dto/create-sale.dto';
+import { CreateTransactionDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Role } from '../auth/roles.enum';
-import { Roles } from 'src/auth/roles.decorator';
+import { ActiveSessionGuard } from 'src/auth/active-session-guard';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, ActiveSessionGuard)
 @Controller('sales')
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}

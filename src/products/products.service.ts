@@ -102,18 +102,14 @@ export class ProductsService {
     return this.prisma.product.delete({ where: { id } });
   }
 
-  async generateReport(startDate: Date, endDate: Date): Promise<Buffer> {
+  async generateReport(): Promise<Buffer> {
+    const date = new Date();
+
     const products = await this.prisma.product.findMany({
       select: {
         name: true,
         stock: true,
         updatedAt: true,
-      },
-      where: {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -126,11 +122,7 @@ export class ProductsService {
       15,
       15,
     );
-    doc.text(
-      `From: ${startDate.toDateString()} To: ${endDate.toDateString()}`,
-      15,
-      20,
-    );
+    doc.text(`Date: ${date.toDateString()}`, 15, 20);
 
     const data = products.map((t) => [
       t.name || '',

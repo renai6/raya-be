@@ -16,10 +16,9 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Role } from '../auth/roles.enum';
-import { Roles } from 'src/auth/roles.decorator';
+import { ActiveSessionGuard } from 'src/auth/active-session-guard';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, ActiveSessionGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -60,15 +59,8 @@ export class ProductsController {
   }
 
   @Get('reports/data')
-  async reports(
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string,
-    @Res() res: Response,
-  ) {
-    const buffer = await this.productsService.generateReport(
-      new Date(startDate),
-      new Date(endDate),
-    );
+  async reports(@Res() res: Response) {
+    const buffer = await this.productsService.generateReport();
 
     const filename = `inventory-report-${Date.now()}.pdf`;
 
