@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CreateBulkEmployeeDto } from './dto/create-bulk-employee.dto';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
@@ -12,6 +13,12 @@ export class EmployeesService {
   async create(createEmployeeDto: CreateEmployeeDto) {
     return this.prisma.employee.create({
       data: createEmployeeDto,
+    });
+  }
+
+  async createBulk(createBulkEmployeeDto: CreateBulkEmployeeDto) {
+    return this.prisma.employee.createMany({
+      data: createBulkEmployeeDto.employees,
     });
   }
 

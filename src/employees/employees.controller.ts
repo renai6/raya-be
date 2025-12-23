@@ -16,6 +16,7 @@ import type { Response } from 'express';
 import { EmployeesService } from './employees.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
+import { CreateBulkEmployeeDto } from './dto/create-bulk-employee.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { ActiveSessionGuard } from 'src/auth/active-session-guard';
@@ -29,6 +30,11 @@ export class EmployeesController {
   @Post()
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeesService.create(createEmployeeDto);
+  }
+
+  @Post('bulk')
+  createBulk(@Body() createBulkEmployeeDto: CreateBulkEmployeeDto) {
+    return this.employeesService.createBulk(createBulkEmployeeDto);
   }
 
   @Get()
