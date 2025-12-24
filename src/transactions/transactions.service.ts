@@ -58,6 +58,7 @@ export class TransactionsService {
         sales: {
           include: { product: true },
         },
+        employee: true,
       },
     });
   }

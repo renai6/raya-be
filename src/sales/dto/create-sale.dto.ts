@@ -5,6 +5,11 @@ export enum SaleType {
   WHOLESALE = 'WHOLESALE',
 }
 
+export enum PaymentType {
+  CASH = 'CASH',
+  CREDIT = 'CREDIT',
+}
+
 export class CreateSaleDto {
   @IsInt()
   productId: string;
@@ -24,6 +29,8 @@ export class CreateSaleDto {
 export class CreateTransactionDto {
   @IsInt()
   cashReceived: number;
-
+  @IsEnum(PaymentType)
+  paymentType: PaymentType;
+  employeeBarcode: string;
   sales: CreateSaleDto[];
 }
