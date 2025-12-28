@@ -29,8 +29,8 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query('page') page: number) {
-    return this.productsService.findAll(page, 10);
+  findAll() {
+    return this.productsService.findAll();
   }
 
   @Get('low-stocks')

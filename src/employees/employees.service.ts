@@ -22,13 +22,7 @@ export class EmployeesService {
     });
   }
 
-  async findAll(page: number, pageSize: number = 10) {
-    let where = {};
-
-    if (page > 0) {
-      where = { skip: (page - 1) * pageSize, take: pageSize };
-    }
-
+  async findAll() {
     const now = new Date();
     const currentDay = now.getDate();
     let startDate: Date;
@@ -59,7 +53,6 @@ export class EmployeesService {
     }
 
     const employees = await this.prisma.employee.findMany({
-      ...where,
       include: {
         transactions: {
           where: {

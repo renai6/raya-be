@@ -31,12 +31,8 @@ export class ProductsService {
     return product;
   }
 
-  async findAll(page: number, pageSize: number = 10) {
-    let where = {};
-    if (page > 0) {
-      where = { skip: (page - 1) * pageSize, take: pageSize };
-    }
-    const products = await this.prisma.product.findMany(where);
+  async findAll() {
+    const products = await this.prisma.product.findMany();
 
     const count = await this.prisma.product.count();
 

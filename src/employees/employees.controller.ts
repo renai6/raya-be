@@ -38,8 +38,8 @@ export class EmployeesController {
   }
 
   @Get()
-  findAll(@Query('page') page: number) {
-    return this.employeesService.findAll(page, 10);
+  findAll() {
+    return this.employeesService.findAll();
   }
 
   @Get(':id') // Will use employee number as id
