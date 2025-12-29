@@ -53,6 +53,7 @@ export class EmployeesService {
     }
 
     const employees = await this.prisma.employee.findMany({
+      where: { isDeleted: false },
       include: {
         transactions: {
           where: {
@@ -105,7 +106,7 @@ export class EmployeesService {
     }
 
     const employee = await this.prisma.employee.findUnique({
-      where: { employeeNumber: id },
+      where: { employeeNumber: id, isDeleted: false },
       include: {
         transactions: {
           where: {
@@ -137,7 +138,10 @@ export class EmployeesService {
   }
 
   async remove(id: string) {
-    return this.prisma.employee.delete({ where: { id } });
+    return this.prisma.employee.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 
   async generateReport(startDate: Date, endDate: Date): Promise<Buffer> {

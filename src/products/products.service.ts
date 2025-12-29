@@ -32,7 +32,9 @@ export class ProductsService {
   }
 
   async findAll() {
-    const products = await this.prisma.product.findMany();
+    const products = await this.prisma.product.findMany({
+      where: { isDeleted: false },
+    });
 
     const count = await this.prisma.product.count();
 
@@ -41,7 +43,7 @@ export class ProductsService {
 
   async findLowStocks() {
     const products = await this.prisma.product.findMany({
-      where: { stock: { lt: 10 } },
+      where: { stock: { lt: 10 }, isDeleted: false },
     });
 
     return products;
@@ -49,6 +51,7 @@ export class ProductsService {
 
   async findProductSales() {
     const products = await this.prisma.product.findMany({
+      where: { isDeleted: false },
       include: {
         sales: true,
       },
@@ -64,11 +67,13 @@ export class ProductsService {
   }
 
   findOne(id: string) {
-    return this.prisma.product.findUnique({ where: { id } });
+    return this.prisma.product.findUnique({ where: { id, isDeleted: false } });
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
-    const product = await this.prisma.product.findUnique({ where: { id } });
+    const product = await this.prisma.product.findUnique({
+      where: { id, isDeleted: false },
+    });
     if (!product) {
       throw new Error('Product not found');
     }
@@ -95,13 +100,17 @@ export class ProductsService {
   }
 
   remove(id: string) {
-    return this.prisma.product.delete({ where: { id } });
+    return this.prisma.product.update({
+      where: { id },
+      data: { isDeleted: true },
+    });
   }
 
   async generateReport(): Promise<Buffer> {
     const date = new Date();
 
     const products = await this.prisma.product.findMany({
+      where: { isDeleted: false },
       select: {
         name: true,
         stock: true,
