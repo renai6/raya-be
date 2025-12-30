@@ -12,6 +12,6 @@ export class CreateEmployeeDto {
   contactNumber?: string;
 
   @IsOptional()
-  @IsEmail()
+  @IsString()
   email?: string;
 }

@@ -33,7 +33,7 @@ model Employee {
   employeeNumber String        @unique
   name           String
   contactNumber  String?
-  email          String?       @unique
+  email          String?
   isDeleted      Boolean       @default(false)
   transactions   Transaction[]
   createdAt      DateTime      @default(now())
