@@ -33,4 +33,5 @@ export class CreateTransactionDto {
   paymentType: PaymentType;
   employeeBarcode: string;
   sales: CreateSaleDto[];
+  cashSessionId: string;
 }

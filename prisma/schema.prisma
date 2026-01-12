@@ -26,6 +26,8 @@ model User {
   role              Role      @default(CASHIER)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+
+  cashSessions CashSession[]
 }
 
 model Employee {
@@ -76,6 +78,24 @@ enum SaleType {
   WHOLESALE
 }
 
+enum CashSessionStatus {
+  OPEN
+  CLOSED
+}
+
+model CashSession {
+  id          String            @id @default(cuid())
+  userId      String
+  openingCash Float
+  closingCash Float?
+  openedAt    DateTime          @default(now())
+  closedAt    DateTime?
+  status      CashSessionStatus @default(OPEN)
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
 model Transaction {
   id             String                 @id @default(cuid())
   sales          Sale[]
@@ -84,8 +104,12 @@ model Transaction {
   employeeNumber String?
   paymentType    TransactionPaymentType @default(CASH)
   createdAt      DateTime               @default(now())
-  employee       Employee?              @relation(fields: [employeeId], references: [id])
-  employeeId     String?
+
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
+
+  cashSessionId String      @default("")
+  cashSession   CashSession @relation(fields: [cashSessionId], references: [id])
 }
 
 model InventoryTransaction {

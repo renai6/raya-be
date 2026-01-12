@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { PrismaService } from 'prisma/prisma.service';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class TransactionsService {
@@ -15,6 +16,18 @@ export class TransactionsService {
       },
     });
   }
+
+  findAllInventoryTransactions() {
+    return this.prisma.inventoryTransaction.findMany({
+      include: {
+        product: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   findAllByDay() {
     const date = new Date();
     const start = new Date(date);
@@ -30,6 +43,37 @@ export class TransactionsService {
         },
       },
     });
+  }
+
+  async getMonthlySales(year: number, month: number) {
+    const startOfMonth = dayjs()
+      .year(year)
+      .month(month - 1)
+      .startOf('month')
+      .toDate();
+    const endOfMonth = dayjs()
+      .year(year)
+      .month(month - 1)
+      .endOf('month')
+      .toDate();
+
+    const result = await this.prisma.transaction.aggregate({
+      _sum: {
+        total: true,
+      },
+      where: {
+        createdAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+    });
+
+    return {
+      year,
+      month,
+      totalSales: result._sum.total || 0,
+    };
   }
 
   findAllByYesterday() {

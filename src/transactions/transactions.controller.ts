@@ -6,6 +6,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -23,9 +24,22 @@ export class TransactionsController {
     return this.transactionsService.findAll();
   }
 
+  @Get('inventory')
+  findAllInventoryTransactions() {
+    return this.transactionsService.findAllInventoryTransactions();
+  }
+
   @Get('day')
   findAllByDay() {
     return this.transactionsService.findAllByDay();
+  }
+
+  @Get('monthly/:year/:month')
+  getMonthlySales(
+    @Param('year', ParseIntPipe) year: number,
+    @Param('month', ParseIntPipe) month: number,
+  ) {
+    return this.transactionsService.getMonthlySales(year, month);
   }
 
   @Get('yesterday')

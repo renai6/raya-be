@@ -38,8 +38,11 @@ export class EmployeesController {
   }
 
   @Get()
-  findAll() {
-    return this.employeesService.findAll();
+  findAll(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.employeesService.findAll(startDate, endDate);
   }
 
   @Get(':id') // Will use employee number as id

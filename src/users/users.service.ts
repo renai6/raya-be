@@ -39,6 +39,46 @@ export class UsersService {
     });
   }
 
+  async createCashSessions(userId: string, openingCash: number) {
+    return this.prisma.cashSession.create({
+      data: {
+        userId,
+        openingCash,
+        status: 'OPEN',
+      },
+    });
+  }
+
+  async updateCashSessions(id: string, closingCash: number) {
+    return this.prisma.cashSession.update({
+      where: { id },
+      data: {
+        closingCash,
+        status: 'CLOSED',
+        closedAt: new Date(),
+      },
+    });
+  }
+
+  async getCashSessions(userId: string) {
+    const cashSession = await this.prisma.cashSession.findFirst({
+      where: { userId, status: 'OPEN' },
+    });
+
+    return cashSession || {};
+  }
+
+  async getCashSessionsById(id: string) {
+    const cashSession = await this.prisma.cashSession.findFirst({
+      where: { id },
+      include: {
+        user: true,
+      },
+    });
+
+    return cashSession || {};
+  }
+
   async remove(id: string) {
     return this.prisma.user.delete({ where: { id: id } });
   }

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateSaleDto, CreateTransactionDto } from './dto/create-sale.dto';
 import { UpdateSaleDto } from './dto/update-sale.dto';
 import { PrismaService } from 'prisma/prisma.service';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class SalesService {
@@ -19,6 +20,7 @@ export class SalesService {
 
       transaction = await this.prisma.transaction.create({
         data: {
+          cashSessionId: createTransactionDto.cashSessionId,
           cashReceived: createTransactionDto.cashReceived,
           paymentType: createTransactionDto.paymentType,
           employeeNumber: createTransactionDto.employeeBarcode || null,
@@ -32,6 +34,7 @@ export class SalesService {
     } else {
       transaction = await this.prisma.transaction.create({
         data: {
+          cashSessionId: createTransactionDto.cashSessionId,
           cashReceived: createTransactionDto.cashReceived,
           paymentType: createTransactionDto.paymentType,
           employeeNumber: null,

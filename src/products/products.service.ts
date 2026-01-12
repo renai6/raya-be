@@ -4,6 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
+import { CreateBulkProductDto } from './dto/create-bulk-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -31,9 +32,69 @@ export class ProductsService {
     return product;
   }
 
+  async createBulk(createBulkProductDto: CreateBulkProductDto) {
+    const barcodes = createBulkProductDto.products.map((p) => p.barcode);
+
+    const existingBarcodes = await this.prisma.product.findMany({
+      where: { barcode: { in: barcodes } },
+    });
+
+    const existingBarcodeMap = new Map(
+      existingBarcodes.map((p) => [p.barcode, p]),
+    );
+
+    for (const product of createBulkProductDto.products) {
+      const existingProduct = existingBarcodeMap.get(product.barcode);
+
+      const productData = await this.prisma.product.upsert({
+        where: { barcode: product.barcode },
+        create: product,
+        update: {
+          ...product,
+          retailPrice: existingProduct
+            ? createBulkProductDto.isPriceExe
+              ? product.retailPrice
+              : existingProduct.retailPrice
+            : product.retailPrice,
+          stock: existingProduct
+            ? existingProduct.stock + product.stock
+            : product.stock,
+        },
+      });
+
+      await this.prisma.inventoryTransaction.create({
+        data: {
+          type: existingProduct ? 'ADJUSTMENT' : 'PURCHASE',
+          productId: productData.id,
+          oldQuantity: existingProduct ? existingProduct.stock : 0,
+          newQuantity: existingProduct
+            ? existingProduct.stock + product.stock
+            : product.stock,
+          oldRetailPrice: existingProduct
+            ? existingProduct.retailPrice
+            : product.retailPrice,
+          newRetailPrice: existingProduct
+            ? createBulkProductDto.isPriceExe
+              ? product.retailPrice
+              : existingProduct.retailPrice
+            : product.retailPrice,
+          oldWholesalePrice: 0,
+          newWholesalePrice: 0,
+          reason: existingProduct ? 'Update stock' : 'Initial stock',
+        },
+      });
+    }
+
+    return { inserted: createBulkProductDto.products.length };
+  }
+
   async findAll() {
     const products = await this.prisma.product.findMany({
       where: { isDeleted: false },
+      include: {
+        sales: true,
+      },
+      orderBy: { name: 'asc' },
     });
 
     const count = await this.prisma.product.count();
@@ -106,48 +167,17 @@ export class ProductsService {
     });
   }
 
-  async generateReport(): Promise<Buffer> {
-    const date = new Date();
-
-    const products = await this.prisma.product.findMany({
+  async generateReport() {
+    return this.prisma.product.findMany({
       where: { isDeleted: false },
       select: {
         name: true,
+        barcode: true,
         stock: true,
+        retailPrice: true,
         updatedAt: true,
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { name: 'asc' },
     });
-
-    const doc = new jsPDF();
-    doc.setFont('helvetica');
-    doc.setFontSize(10);
-    doc.text(
-      'Steel Colors and Metal Products - Canteent Invetory Report',
-      15,
-      15,
-    );
-    doc.text(`Date: ${date.toDateString()}`, 15, 20);
-
-    const data = products.map((t) => [
-      t.name || '',
-      t.stock.toString(),
-      t.updatedAt.toDateString(),
-    ]);
-
-    autoTable(doc, {
-      headStyles: { fillColor: [22, 160, 133] },
-      head: [['Name', 'Stock', 'Date']],
-      body: data,
-      startY: 25,
-      columnStyles: {
-        0: { cellWidth: 100 },
-        1: { cellWidth: 30 },
-        2: { cellWidth: 40 },
-      },
-    });
-
-    const buffer = doc.output('arraybuffer');
-    return Buffer.from(buffer);
   }
 }

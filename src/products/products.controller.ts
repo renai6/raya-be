@@ -17,6 +17,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { ActiveSessionGuard } from 'src/auth/active-session-guard';
+import { CreateBulkProductDto } from './dto/create-bulk-product.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard, ActiveSessionGuard)
 @Controller('products')
@@ -26,6 +27,11 @@ export class ProductsController {
   @Post()
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
+  }
+
+  @Post('bulk')
+  createBulk(@Body() createBulkProductDto: CreateBulkProductDto) {
+    return this.productsService.createBulk(createBulkProductDto);
   }
 
   @Get()
@@ -59,13 +65,7 @@ export class ProductsController {
   }
 
   @Get('reports/data')
-  async reports(@Res() res: Response) {
-    const buffer = await this.productsService.generateReport();
-
-    const filename = `inventory-report-${Date.now()}.pdf`;
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(buffer);
+  async reports() {
+    return this.productsService.generateReport();
   }
 }

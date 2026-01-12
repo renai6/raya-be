@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -37,5 +38,31 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+
+  @Put(':id/cash-sessions')
+  updateCashSessions(
+    @Body() body: { closingCash: number },
+    @Param('id') id: string,
+  ) {
+    return this.usersService.updateCashSessions(id, body.closingCash);
+  }
+
+  @Get(':userId/cash-sessions')
+  getCashSessions(@Param('userId') userId: string) {
+    return this.usersService.getCashSessions(userId);
+  }
+
+  @Get(':id/cash-session')
+  getCashSessionsById(@Param('id') id: string) {
+    return this.usersService.getCashSessionsById(id);
+  }
+
+  @Post(':userId/cash-sessions')
+  createCashSessions(
+    @Body() body: { openingCash: number },
+    @Param('userId') userId: string,
+  ) {
+    return this.usersService.createCashSessions(userId, body.openingCash);
   }
 }

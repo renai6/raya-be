@@ -5,6 +5,15 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { CreateBulkEmployeeDto } from './dto/create-bulk-employee.dto';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Optional but recommended
+dayjs.tz.setDefault('Asia/Manila');
 
 @Injectable()
 export class EmployeesService {
@@ -22,44 +31,24 @@ export class EmployeesService {
     });
   }
 
-  async findAll() {
-    const now = new Date();
-    const currentDay = now.getDate();
-    let startDate: Date;
-    let endDate: Date;
+  async findAll(startDate: string, endDate: string) {
+    const start = startDate
+      ? dayjs.tz(`${startDate} 00:00`, 'YYYY-MM-DD HH:mm', 'Asia/Manila')
+      : dayjs().tz('Asia/Manila').startOf('day');
 
-    if (currentDay <= 15) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      endDate = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        15,
-        23,
-        59,
-        59,
-        999,
-      );
-    } else {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 16);
-      endDate = new Date(
-        now.getFullYear(),
-        now.getMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-        999,
-      );
-    }
+    const end = endDate
+      ? dayjs.tz(`${endDate} 23:59`, 'YYYY-MM-DD HH:mm', 'Asia/Manila')
+      : dayjs().tz('Asia/Manila').endOf('day');
 
     const employees = await this.prisma.employee.findMany({
       where: { isDeleted: false },
+      orderBy: { name: 'asc' },
       include: {
         transactions: {
           where: {
             createdAt: {
-              gte: startDate,
-              lte: endDate,
+              gte: start.toDate(),
+              lte: end.toDate(),
             },
           },
         },
