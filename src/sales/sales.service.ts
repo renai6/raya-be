@@ -76,6 +76,31 @@ export class SalesService {
     return this.prisma.sale.findMany();
   }
 
+  findAllDated(startDate: string, endDate: string) {
+    const start = startDate
+      ? dayjs.tz(`${startDate} 00:00`, 'YYYY-MM-DD HH:mm', 'Asia/Manila')
+      : dayjs().tz('Asia/Manila').startOf('day');
+
+    const end = endDate
+      ? dayjs.tz(`${endDate} 23:59`, 'YYYY-MM-DD HH:mm', 'Asia/Manila')
+      : dayjs().tz('Asia/Manila').endOf('day');
+
+    return this.prisma.sale.findMany({
+      where: {
+        createdAt: {
+          gte: start.toDate(),
+          lte: end.toDate(),
+        },
+      },
+      include: {
+        product: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.sale.findUnique({ where: { id } });
   }

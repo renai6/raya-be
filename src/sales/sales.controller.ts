@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { SalesService } from './sales.service';
 import { CreateTransactionDto } from './dto/create-sale.dto';
@@ -29,6 +30,14 @@ export class SalesController {
   @Get()
   findAll() {
     return this.salesService.findAll();
+  }
+
+  @Get('dated')
+  findAllDated(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.salesService.findAllDated(startDate, endDate);
   }
 
   @Get(':id')

@@ -28,12 +28,10 @@ export class TransactionsService {
     });
   }
 
-  findAllByDay() {
-    const date = new Date();
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+  findAllByDay(dateSelected: string) {
+    const date = dateSelected ? dayjs(dateSelected) : dayjs();
+    const start = date.startOf('day').toDate();
+    const end = date.endOf('day').toDate();
 
     return this.prisma.transaction.findMany({
       where: { createdAt: { gte: start, lte: end } },

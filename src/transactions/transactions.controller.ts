@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -30,8 +31,8 @@ export class TransactionsController {
   }
 
   @Get('day')
-  findAllByDay() {
-    return this.transactionsService.findAllByDay();
+  findAllByDay(@Query('date') date: string) {
+    return this.transactionsService.findAllByDay(date);
   }
 
   @Get('monthly/:year/:month')
