@@ -4,8 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomUUID } from 'crypto';
 import { PrismaService } from 'prisma/prisma.service';
-import { ALLOWED_USERS } from 'lib/constants';
-import { logger } from 'lib/utils';
 
 @Injectable()
 export class AuthService {
@@ -28,10 +26,6 @@ export class AuthService {
 
   async login(user: any) {
     const sessionId = randomUUID();
-
-    if (!ALLOWED_USERS.includes(user.id)) {
-      logger(user);
-    }
 
     await this.prisma.user.update({
       where: { id: user.id },

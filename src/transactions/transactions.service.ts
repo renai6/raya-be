@@ -34,11 +34,17 @@ export class TransactionsService {
     const end = date.endOf('day').toDate();
 
     return this.prisma.transaction.findMany({
-      where: { createdAt: { gte: start, lte: end } },
+      where: {
+        createdAt: { gte: start, lte: end },
+        cashSession: {
+          status: 'OPEN',
+        },
+      },
       include: {
         sales: {
           include: { product: true },
         },
+        cashSession: true,
       },
     });
   }

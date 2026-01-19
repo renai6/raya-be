@@ -11,25 +11,57 @@ export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto) {
-    const product = await this.prisma.product.create({
-      data: createProductDto,
-    });
-
-    await this.prisma.inventoryTransaction.create({
-      data: {
-        type: 'PURCHASE',
-        productId: product.id,
-        oldQuantity: 0,
-        newQuantity: createProductDto.stock,
-        oldRetailPrice: createProductDto.retailPrice,
-        newRetailPrice: createProductDto.retailPrice,
-        oldWholesalePrice: createProductDto.wholesalePrice,
-        newWholesalePrice: createProductDto.wholesalePrice,
-        reason: 'Initial stock',
+    const checkProduct = await this.prisma.product.findFirst({
+      where: {
+        barcode: createProductDto.barcode,
       },
     });
 
-    return product;
+    if (checkProduct) {
+      await this.prisma.product.update({
+        where: { id: checkProduct.id },
+        data: {
+          name: createProductDto.name,
+          isDeleted: false,
+          retailPrice: createProductDto.retailPrice,
+          stock: createProductDto.stock,
+        },
+      });
+
+      await this.prisma.inventoryTransaction.create({
+        data: {
+          type: 'PURCHASE',
+          productId: checkProduct.id,
+          oldQuantity: 0,
+          newQuantity: createProductDto.stock,
+          oldRetailPrice: createProductDto.retailPrice,
+          newRetailPrice: createProductDto.retailPrice,
+          oldWholesalePrice: createProductDto.wholesalePrice,
+          newWholesalePrice: createProductDto.wholesalePrice,
+          reason: 'Initial stock',
+        },
+      });
+    } else {
+      const product = await this.prisma.product.create({
+        data: createProductDto,
+      });
+
+      await this.prisma.inventoryTransaction.create({
+        data: {
+          type: 'PURCHASE',
+          productId: product.id,
+          oldQuantity: 0,
+          newQuantity: createProductDto.stock,
+          oldRetailPrice: createProductDto.retailPrice,
+          newRetailPrice: createProductDto.retailPrice,
+          oldWholesalePrice: createProductDto.wholesalePrice,
+          newWholesalePrice: createProductDto.wholesalePrice,
+          reason: 'Initial stock',
+        },
+      });
+
+      return product;
+    }
   }
 
   async createBulk(createBulkProductDto: CreateBulkProductDto) {
@@ -156,7 +188,13 @@ export class ProductsService {
 
     return this.prisma.product.update({
       where: { id },
-      data: updateProductDto,
+      data: {
+        name: updateProductDto.name,
+        retailPrice: updateProductDto.retailPrice,
+        wholesalePrice: 0,
+        stock: updateProductDto.stock,
+        barcode: updateProductDto.barcode,
+      },
     });
   }
 

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `transaction` MODIFY `number` INTEGER NOT NULL AUTO_INCREMENT;
