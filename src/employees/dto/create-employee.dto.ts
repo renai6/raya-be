@@ -14,4 +14,10 @@ export class CreateEmployeeDto {
   @IsOptional()
   @IsString()
   email?: string;
+
+  @IsOptional()
+  isPaid?: string;
+
+  @IsOptional()
+  creditLimit?: number;
 }

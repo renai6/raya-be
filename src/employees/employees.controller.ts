@@ -58,6 +58,11 @@ export class EmployeesController {
     return this.employeesService.update(id, updateEmployeeDto);
   }
 
+  @Put(':id/credit-status')
+  updateCreditStatus(@Param('id') id: string) {
+    return this.employeesService.updateUserCreditStatus(id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.employeesService.remove(id);

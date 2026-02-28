@@ -26,9 +26,41 @@ export class EmployeesService {
   }
 
   async createBulk(createBulkEmployeeDto: CreateBulkEmployeeDto) {
-    return this.prisma.employee.createMany({
-      data: createBulkEmployeeDto.employees,
-    });
+    for (const employee of createBulkEmployeeDto.employees) {
+      const existing = await this.prisma.employee.findUnique({
+        where: { employeeNumber: employee.employeeNumber },
+      });
+
+      if (existing) {
+        // Update if exists
+        await this.prisma.employee.update({
+          where: { employeeNumber: employee.employeeNumber },
+          data: {
+            name: employee.name,
+            contactNumber: employee.contactNumber,
+            email: employee.email,
+            creditLimit: employee.creditLimit,
+          },
+        });
+
+        if (employee.isPaid) {
+          await this.prisma.transaction.updateMany({
+            where: { employeeId: existing.id },
+            data: {
+              isPaid: true,
+            },
+          });
+        }
+      } else {
+        delete employee.isPaid; // Remove isPaid from the data to be created
+        // Create if doesn't exist
+        await this.prisma.employee.create({
+          data: employee,
+        });
+      }
+    }
+
+    return { message: 'Bulk employee data processed successfully' };
   }
 
   async findAll(startDate: string, endDate: string) {
@@ -122,7 +154,19 @@ export class EmployeesService {
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
     return this.prisma.employee.update({
       where: { id },
-      data: updateEmployeeDto,
+      data: {
+        ...updateEmployeeDto,
+        creditLimit: Number(updateEmployeeDto.creditLimit),
+      },
+    });
+  }
+
+  async updateUserCreditStatus(id: string) {
+    return this.prisma.transaction.updateMany({
+      where: { employeeId: id },
+      data: {
+        isPaid: true,
+      },
     });
   }
 
