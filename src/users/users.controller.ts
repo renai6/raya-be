@@ -7,9 +7,12 @@ import {
   Post,
   Put,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -42,10 +45,10 @@ export class UsersController {
 
   @Put(':id/cash-sessions')
   updateCashSessions(
-    @Body() body: { closingCash: number },
+    @Body() body: { closingCash?: number; borrowedCash?: number },
     @Param('id') id: string,
   ) {
-    return this.usersService.updateCashSessions(id, body.closingCash);
+    return this.usersService.updateCashSessions(id, body);
   }
 
   @Get(':userId/cash-sessions')
@@ -64,5 +67,26 @@ export class UsersController {
     @Param('userId') userId: string,
   ) {
     return this.usersService.createCashSessions(userId, body.openingCash);
+  }
+
+  @Put(':id/change-password')
+  @UseGuards(JwtAuthGuard)
+  async changePassword(
+    @Param('id') id: string,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    try {
+      const result = await this.usersService.changePassword(
+        id,
+        changePasswordDto.oldPassword,
+        changePasswordDto.newPassword,
+      );
+      return {
+        message: 'Password changed successfully',
+        user: result,
+      };
+    } catch (error) {
+      throw new BadRequestException('Failed to change password');
+    }
   }
 }
