@@ -14,6 +14,9 @@ export class TransactionsService {
           include: { product: true },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
