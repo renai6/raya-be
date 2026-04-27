@@ -31,6 +31,20 @@ export class TransactionsService {
     });
   }
 
+  findAllByCashSessionId(cashSessionId: string) {
+    return this.prisma.transaction.findMany({
+      where: {
+        cashSessionId: cashSessionId,
+      },
+      include: {
+        sales: {
+          include: { product: true },
+        },
+        cashSession: true,
+      },
+    });
+  }
+
   findAllByDay(dateSelected: string) {
     const date = dateSelected ? dayjs(dateSelected) : dayjs();
     const start = date.startOf('day').toDate();
