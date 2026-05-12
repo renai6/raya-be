@@ -56,7 +56,7 @@ export class UsersService {
       borrowedCash,
     }: { closingCash?: number; borrowedCash?: number },
   ) {
-    if (closingCash) {
+    if (closingCash !== undefined) {
       return this.prisma.cashSession.update({
         where: { id },
         data: {
