@@ -85,13 +85,14 @@ enum CashSessionStatus {
 }
 
 model CashSession {
-  id          String            @id @default(cuid())
-  userId      String
-  openingCash Float
-  closingCash Float?
-  openedAt    DateTime          @default(now())
-  closedAt    DateTime?
-  status      CashSessionStatus @default(OPEN)
+  id           String            @id @default(cuid())
+  userId       String
+  openingCash  Float
+  closingCash  Float?
+  borrowedCash Float?            @default(0)
+  openedAt     DateTime          @default(now())
+  closedAt     DateTime?
+  status       CashSessionStatus @default(OPEN)
 
   user         User          @relation(fields: [userId], references: [id])
   transactions Transaction[]

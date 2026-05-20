@@ -49,15 +49,30 @@ export class UsersService {
     });
   }
 
-  async updateCashSessions(id: string, closingCash: number) {
-    return this.prisma.cashSession.update({
-      where: { id },
-      data: {
-        closingCash,
-        status: 'CLOSED',
-        closedAt: new Date(),
-      },
-    });
+  async updateCashSessions(
+    id: string,
+    {
+      closingCash,
+      borrowedCash,
+    }: { closingCash?: number; borrowedCash?: number },
+  ) {
+    if (closingCash !== undefined) {
+      return this.prisma.cashSession.update({
+        where: { id },
+        data: {
+          closingCash,
+          status: 'CLOSED',
+          closedAt: new Date(),
+        },
+      });
+    } else {
+      return this.prisma.cashSession.update({
+        where: { id },
+        data: {
+          borrowedCash,
+        },
+      });
+    }
   }
 
   async getCashSessions(userId: string) {
@@ -77,6 +92,24 @@ export class UsersService {
     });
 
     return cashSession || {};
+  }
+
+  async changePassword(id: string, oldPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!passwordMatch) {
+      throw new Error('Old password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    return this.prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
   }
 
   async remove(id: string) {

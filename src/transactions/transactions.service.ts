@@ -14,6 +14,9 @@ export class TransactionsService {
           include: { product: true },
         },
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -24,6 +27,20 @@ export class TransactionsService {
       },
       orderBy: {
         createdAt: 'desc',
+      },
+    });
+  }
+
+  findAllByCashSessionId(cashSessionId: string) {
+    return this.prisma.transaction.findMany({
+      where: {
+        cashSessionId: cashSessionId,
+      },
+      include: {
+        sales: {
+          include: { product: true },
+        },
+        cashSession: true,
       },
     });
   }

@@ -35,6 +35,11 @@ export class TransactionsController {
     return this.transactionsService.findAllByDay(date);
   }
 
+  @Get('cash-session/:cashSessionId')
+  findAllByCashSessionId(@Param('cashSessionId') cashSessionId: string) {
+    return this.transactionsService.findAllByCashSessionId(cashSessionId);
+  }
+
   @Get('monthly/:year/:month')
   getMonthlySales(
     @Param('year', ParseIntPipe) year: number,
