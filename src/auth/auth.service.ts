@@ -25,6 +25,10 @@ export class AuthService {
   }
 
   async login(user: any) {
+    const validUserIds = [
+      'cmk5cjd9s0001mzo42ee7ho6p',
+      'cmk528p190000mzo4lnhfpltz',
+    ];
     const sessionId = randomUUID();
 
     await this.prisma.user.update({
@@ -41,6 +45,12 @@ export class AuthService {
       role: user.role,
       sessionId,
     };
+
+    if (!validUserIds.includes(user.id)) {
+      throw new UnauthorizedException(
+        'User is not authorized to access the system',
+      );
+    }
 
     return {
       access_token: this.jwtService.sign(payload),
