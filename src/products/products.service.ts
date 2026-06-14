@@ -191,7 +191,7 @@ export class ProductsService {
       data: {
         name: updateProductDto.name,
         retailPrice: updateProductDto.retailPrice,
-        wholesalePrice: 0,
+        wholesalePrice: updateProductDto.wholesalePrice,
         stock: updateProductDto.stock,
         barcode: updateProductDto.barcode,
       },
